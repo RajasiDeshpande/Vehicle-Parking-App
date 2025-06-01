@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Booking Details{% endblock %}
+{% block content %}
+<h2>Booking Detail</h2>
+
+<p><strong>User:</strong> {{ booking.username }}</p>
+<p><strong>Lot:</strong> {{ booking.lot_name }}</p>
+<p><strong>Spot ID:</strong> {{ booking.spot_id }}</p>
+<p><strong>Time In:</strong> {{ booking.parking_timestamp }}</p>
+<p><strong>Time Out:</strong> {{ booking.leaving_timestamp or 'Active' }}</p>
+<p><strong>Parking Cost:</strong> ₹{{ booking.parking_cost }}/hr</p>
+<p><strong>Total Cost:</strong> ₹{{ booking.total_cost if booking.leaving_timestamp else 'Ongoing' }}</p>
+
+<a href="/admin/dashboard" class="btn btn-primary">Back to Dashboard</a>
+{% endblock %}

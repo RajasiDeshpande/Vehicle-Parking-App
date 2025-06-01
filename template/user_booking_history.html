@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}My Bookings{% endblock %}
+{% block content %}
+<h2>Booking History</h2>
+
+{% if bookings %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Spot ID</th>
+      <th>Lot</th>
+      <th>Time In</th>
+      <th>Time Out</th>
+      <th>Total Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for booking in bookings %}
+    <tr>
+      <td>{{ booking.spot_id }}</td>
+      <td>{{ booking.lot_name }}</td>
+      <td>{{ booking.parking_timestamp }}</td>
+      <td>{{ booking.leaving_timestamp or 'Active' }}</td>
+      <td>
+        {% if booking.leaving_timestamp %}
+          ₹{{ booking.total_cost }}
+        {% else %}
+          Ongoing
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No bookings found.</p>
+{% endif %}
+{% endblock %}

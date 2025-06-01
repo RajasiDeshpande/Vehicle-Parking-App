@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<a href="/admin/lot/create" class="btn btn-primary my-2">Add Parking Lot</a>
+<a href="/admin/users" class="btn btn-info my-2">View Users</a>
+<a href="/admin/charts" class="btn btn-warning my-2">View Stats</a>
+
+<h4 class="mt-4">All Parking Lots:</h4>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Location</th>
+      <th>Price/hr</th>
+      <th>Spots</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lot in lots %}
+    <tr>
+      <td>{{ lot.id }}</td>
+      <td>{{ lot.prime_location_name }}</td>
+      <td>{{ lot.price }}</td>
+      <td>{{ lot.maximum_number_of_spots }}</td>
+      <td>
+        <a href="/admin/lot/{{ lot.id }}" class="btn btn-sm btn-success">View</a>
+        <a href="/admin/lot/edit/{{ lot.id }}" class="btn btn-sm btn-warning">Edit</a>
+        <a href="/admin/lot/delete/{{ lot.id }}" class="btn btn-sm btn-danger">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

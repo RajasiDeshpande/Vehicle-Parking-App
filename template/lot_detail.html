@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Lot Details{% endblock %}
+{% block content %}
+<h2>Parking Lot: {{ lot.prime_location_name }}</h2>
+
+<p><strong>Address:</strong> {{ lot.address }}</p>
+<p><strong>Pin Code:</strong> {{ lot.pincode }}</p>
+<p><strong>Price:</strong> ₹{{ lot.price }}/hr</p>
+<p><strong>Total Spots:</strong> {{ lot.maximum_number_of_spots }}</p>
+
+<h4 class="mt-4">Spot Status:</h4>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Spot ID</th>
+      <th>Status</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for spot in spots %}
+    <tr>
+      <td>{{ spot.id }}</td>
+      <td>
+        {% if spot.status == 'A' %}
+          <span class="text-success">Available</span>
+        {% else %}
+          <span class="text-danger">Occupied</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if spot.status == 'O' %}
+          <a href="/admin/booking/{{ spot.current_booking_id }}" class="btn btn-sm btn-info">View</a>
+        {% else %}
+          ---
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

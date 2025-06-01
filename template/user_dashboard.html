@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
+<h2>Welcome, {{ user.name }}!</h2>
+
+<h4>Select a Parking Lot to Book:</h4>
+<form method="POST" action="/user/book">
+  <div class="mb-3">
+    <label for="lot">Parking Lot</label>
+    <select name="lot_id" class="form-select" required>
+      {% for lot in lots %}
+        <option value="{{ lot.id }}">{{ lot.prime_location_name }} - ₹{{ lot.price }}/hr</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn-success">Book Spot</button>
+</form>
+
+<h4 class="mt-5">Your Active Booking:</h4>
+{% if active_booking %}
+  <p><strong>Location:</strong> {{ active_booking.lot_name }}</p>
+  <p><strong>Spot ID:</strong> {{ active_booking.spot_id }}</p>
+  <p><strong>Time In:</strong> {{ active_booking.parking_timestamp }}</p>
+  <form method="POST" action="/user/release">
+    <button type="submit" class="btn btn-danger">Release Spot</button>
+  </form>
+{% else %}
+  <p>No active bookings.</p>
+{% endif %}
+{% endblock %}

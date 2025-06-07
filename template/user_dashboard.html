@@ -2,6 +2,11 @@
 {% block title %}User Dashboard{% endblock %}
 {% block content %}
 <h2>Welcome, {{ user.name }}!</h2>
+<div class="mb-4">
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary me-2">Dashboard</a>
+    <a href="{{ url_for('user_booking_history') }}" class="btn btn-secondary">My Bookings</a>
+    <a href="{{ url_for('user_charts') }}" class="btn btn-info">My Statistics</a>
+</div>
 
 <h4>Select a Parking Lot to Book:</h4>
 <form method="POST" action="/user/book">

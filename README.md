@@ -49,7 +49,7 @@ A Flask-based web application for managing vehicle parking spaces. This applicat
 4. Set up environment variables by creating a `.env` file:
    ```
    # Security
-   SECRET_KEY=your-very-secure-secret-key
+   SECRET_KEY=your_secret_key_here
 
    # Flask Configuration
    FLASK_APP=app.py
@@ -58,6 +58,16 @@ A Flask-based web application for managing vehicle parking spaces. This applicat
 
    # Database
    DATABASE_URL=sqlite:///parking_app.db
+
+   # Optional - Mail configuration (if you want to add email features later)
+   # MAIL_SERVER=smtp.example.com
+   # MAIL_PORT=587
+   # MAIL_USERNAME=your_email@example.com
+   # MAIL_PASSWORD=your_email_password
+   # MAIL_USE_TLS=True
+
+   # Optional - Third-party services (if needed)
+   # STRIPE_API_KEY=your_stripe_api_key
    ```
 
 5. Initialize the database:

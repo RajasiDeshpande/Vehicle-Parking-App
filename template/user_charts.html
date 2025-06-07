@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}My Parking Statistics{% endblock %}
+{% block content %}
+<h2>My Parking Statistics</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Total Spent</h5>
+                <h2 class="text-primary">₹{{ total_spent|default('0.00') }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Hours Parked</h5>
+                <h2 class="text-success">{{ hours_parked|default('0.00') }} hrs</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <canvas id="lotChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('lotChart').getContext('2d');
+        const labelData = {{ labels|tojson|safe }};
+        const chartData = {{ data|tojson|safe }};
+        
+        if (labelData && labelData.length > 0) {
+            const lotChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labelData,
+                    datasets: [{
+                        label: 'Parking Lots Used',
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Parking Lots Used'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    return `${label}: ${value} bookings`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('lotChart').parentNode.innerHTML = 
+                '<div class="alert alert-info">No parking data available to show.</div>';
+        }
+    });
+</script>
+
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        height: 100%;
+    }
+    canvas {
+        max-height: 400px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Search Parking Spots{% endblock %}
+{% block content %}
+<h2>Search Parking Spots</h2>
+
+<form method="POST" class="mb-4">
+  <div class="input-group">
+    <input type="text" name="search" class="form-control" placeholder="Search by spot ID or lot name">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </div>
+</form>
+
+{% if results %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Spot ID</th>
+        <th>Parking Lot</th>
+        <th>Status</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for spot in results %}
+      <tr>
+        <td>{{ spot.id }}</td>
+        <td>{{ spot.lot_name }}</td>
+        <td>
+          {% if spot.status == 'Available' %}
+            <span class="badge bg-success">Available</span>
+          {% else %}
+            <span class="badge bg-danger">Occupied</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if spot.status == 'Occupied' %}
+            Booked by: {{ spot.user }}
+            <a href="/admin/booking/{{ spot.booking_id }}" class="btn btn-sm btn-info">View</a>
+          {% else %}
+            ---
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% elif results is not none %}
+  <p>No spots found matching your search.</p>
+{% endif %}
+{% endblock %}

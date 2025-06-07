@@ -379,6 +379,107 @@ def charts():
     
     return render_template('charts.html', labels=labels, available_data=available_data, occupied_data=occupied_data)
 
+# @app.route('/user/dashboard')
+# def user_dashboard():
+    # if 'user_id' not in session or session['role'] != 'user':
+    #     return redirect(url_for('unauthorized'))
+    
+    # user = User.query.get(session['user_id'])
+    # lots = ParkingLot.query.all()
+    
+    # # Check if user has an active booking
+    # active_booking = Booking.query.filter_by(
+    #     user_id=session['user_id'], 
+    #     leaving_timestamp=None
+    # ).join(ParkingLot).add_columns(
+    #     ParkingLot.prime_location_name.label('lot_name')
+    # ).first()
+    
+    # if active_booking:
+    #     active_booking_data = {
+    #         'lot_name': active_booking.lot_name,
+    #         'spot_id': active_booking[0].spot_id,
+    #         'parking_timestamp': active_booking[0].parking_timestamp.strftime('%d %b %Y, %H:%M')
+    #     }
+    # else:
+    #     active_booking_data = None
+    
+    # return render_template('user_dashboard.html', user=user, lots=lots, active_booking=active_booking_data)
+
+@app.route('/user/charts')
+def user_charts():
+    if 'user_id' not in session or session['role'] != 'user':
+        return redirect(url_for('unauthorized'))
+    
+    user_id = session['user_id']
+    
+    # Get booking history data
+    bookings = Booking.query.filter_by(user_id=user_id).all()
+    
+    # Create data for charts
+    lots_used = {}
+    total_spent = 0
+    hours_parked = 0
+    
+    for booking in bookings:
+        lot = ParkingLot.query.get(booking.lot_id)
+        if lot.prime_location_name in lots_used:
+            lots_used[lot.prime_location_name] += 1
+        else:
+            lots_used[lot.prime_location_name] = 1
+        
+        if booking.leaving_timestamp:
+            total_spent += booking.total_cost or 0
+            duration = (booking.leaving_timestamp - booking.parking_timestamp).total_seconds() / 3600
+            hours_parked += duration
+    
+    # Create chart data
+    labels = list(lots_used.keys())
+    data = list(lots_used.values())
+    
+    return render_template('user_charts.html', 
+                          labels=labels, 
+                          data=data, 
+                          total_spent=round(total_spent, 2),
+                          hours_parked=round(hours_parked, 2))
+
+@app.route('/admin/search', methods=['GET', 'POST'])
+def admin_search():
+    if 'admin_id' not in session or session['role'] != 'admin':
+        return redirect(url_for('unauthorized'))
+    
+    results = None
+    if request.method == 'POST':
+        search_term = request.form['search']
+        
+        # Search for spots by ID
+        try:
+            spot_id = int(search_term)
+            spots = ParkingSpot.query.filter_by(id=spot_id)
+        except ValueError:
+            # If not a number, search parking lots by name
+            spots = ParkingSpot.query.join(ParkingLot).filter(
+                ParkingLot.prime_location_name.like(f'%{search_term}%')
+            )
+        
+        results = []
+        for spot in spots:
+            lot = ParkingLot.query.get(spot.lot_id)
+            spot_info = {
+                'id': spot.id,
+                'lot_name': lot.prime_location_name,
+                'status': 'Available' if spot.status == 'A' else 'Occupied'
+            }
+            if spot.status == 'O':
+                booking = Booking.query.filter_by(spot_id=spot.id, leaving_timestamp=None).first()
+                if booking:
+                    user = User.query.get(booking.user_id)
+                    spot_info['user'] = user.name
+                    spot_info['booking_id'] = booking.id
+            results.append(spot_info)
+    
+    return render_template('admin_search.html', results=results)
+
 # Utility routes
 @app.route('/unauthorized')
 def unauthorized():

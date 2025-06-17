@@ -2,9 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import time
 import os
 from config import Config
 from models import db, User, Admin, ParkingLot, ParkingSpot, Booking
+from flask_mail import Mail, Message
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='template')
@@ -13,6 +15,14 @@ app.config.from_object(Config)
 # Initialize database
 db.init_app(app)
 
+# Initialize Mail
+mail = Mail(app)
+
+# Function to send email
+def send_email(subject, recipient, template, **kwargs):
+    msg = Message(subject, recipients=[recipient])
+    msg.html = render_template(template, **kwargs)
+    mail.send(msg)
 
 # Routes
 @app.route('/')
@@ -38,6 +48,22 @@ def user_register():
         new_user = User(name=name, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
+
+        # Send registration confirmation email
+        try:
+            send_email(
+                'Welcome to Vehicle Parking App',
+                email,
+                'emails/registration.html',
+                name=name,
+                email=email,
+                date=datetime.now().strftime('%d %b %Y, %H:%M'),
+                year=datetime.now().year
+            )
+        except Exception as e:
+            # Log the error but continue with registration
+            print(f"Email error: {str(e)}")
+        
         
         flash('Registration successful! Please log in.')
         return redirect(url_for('user_login'))
@@ -96,6 +122,8 @@ def user_book():
     
     lot_id = request.form['lot_id']
     user_id = session['user_id']
+    user = User.query.get(user_id)  # Get user object from database
+
     
     # Check if user already has an active booking
     existing_booking = Booking.query.filter_by(user_id=user_id, leaving_timestamp=None).first()
@@ -128,6 +156,24 @@ def user_book():
     
     db.session.add(new_booking)
     db.session.commit()
+
+    # Send booking confirmation email
+    try:
+        send_email(
+            'Parking Spot Booking Confirmation',
+            user.email,
+            'emails/booking_confirmation.html',
+            name=user.name,
+            lot_name=lot.prime_location_name,
+            spot_id=available_spot.id,
+            time=new_booking.parking_timestamp.strftime('%d %b %Y, %H:%M'),
+            rate=lot.price,
+            year=datetime.now().year
+        )
+    except Exception as e:
+        # Log the error but continue with booking
+        print(f"Email error: {str(e)}")
+   
     
     flash('Parking spot booked successfully')
     return redirect(url_for('user_dashboard'))
@@ -137,12 +183,17 @@ def user_release():
     if 'user_id' not in session or session['role'] != 'user':
         return redirect(url_for('unauthorized'))
     
+    user_id = session['user_id']
+    user = User.query.get(user_id)  # Get user object from database
+
     # Find active booking
     booking = Booking.query.filter_by(user_id=session['user_id'], leaving_timestamp=None).first()
     
     if not booking:
         flash('No active booking found')
         return redirect(url_for('user_dashboard'))
+    
+    lot = ParkingLot.query.get(booking.lot_id)
     
     # Calculate total cost
     time_now = datetime.now()
@@ -159,6 +210,28 @@ def user_release():
     spot.current_booking_id = None
     
     db.session.commit()
+
+    # Send payment receipt email
+    try:
+        send_email(
+            'Your Vehicle Parking Receipt',
+            user.email,
+            'emails/payment_receipt.html',
+            name=user.name,
+            lot_name=lot.prime_location_name,
+            spot_id=booking.spot_id,
+            parking_time=booking.parking_timestamp.strftime('%d %b %Y, %H:%M'),
+            leaving_time=booking.leaving_timestamp.strftime('%d %b %Y, %H:%M'),
+            duration=round(hours_parked, 2),
+            rate=booking.parking_cost,
+            total_cost=booking.total_cost,
+            year=datetime.now().year,
+            receipt_id=f"{booking.id}-{int(time.time())}"
+        )
+    except Exception as e:
+        # Log the error but continue
+        print(f"Email error: {str(e)}")
+    
     
     flash(f'Spot released. Total cost: ₹{booking.total_cost}')
     return redirect(url_for('user_dashboard'))
@@ -379,32 +452,6 @@ def charts():
     
     return render_template('charts.html', labels=labels, available_data=available_data, occupied_data=occupied_data)
 
-# @app.route('/user/dashboard')
-# def user_dashboard():
-    # if 'user_id' not in session or session['role'] != 'user':
-    #     return redirect(url_for('unauthorized'))
-    
-    # user = User.query.get(session['user_id'])
-    # lots = ParkingLot.query.all()
-    
-    # # Check if user has an active booking
-    # active_booking = Booking.query.filter_by(
-    #     user_id=session['user_id'], 
-    #     leaving_timestamp=None
-    # ).join(ParkingLot).add_columns(
-    #     ParkingLot.prime_location_name.label('lot_name')
-    # ).first()
-    
-    # if active_booking:
-    #     active_booking_data = {
-    #         'lot_name': active_booking.lot_name,
-    #         'spot_id': active_booking[0].spot_id,
-    #         'parking_timestamp': active_booking[0].parking_timestamp.strftime('%d %b %Y, %H:%M')
-    #     }
-    # else:
-    #     active_booking_data = None
-    
-    # return render_template('user_dashboard.html', user=user, lots=lots, active_booking=active_booking_data)
 
 @app.route('/user/charts')
 def user_charts():

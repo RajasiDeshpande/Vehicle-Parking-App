@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .booking-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Booking Confirmation</h2>
+        </div>
+        <div class="content">
+            <p>Hello {{ name }},</p>
+            <p>Your parking spot has been successfully booked.</p>
+            
+            <div class="booking-details">
+                <h3>Booking Details:</h3>
+                <p><strong>Location:</strong> {{ lot_name }}</p>
+                <p><strong>Spot Number:</strong> {{ spot_id }}</p>
+                <p><strong>Time:</strong> {{ time }}</p>
+                <p><strong>Rate:</strong> ₹{{ rate }}/hour</p>
+            </div>
+            
+            <p>To release your spot, please log in to your account and use the "Release Spot" button on your dashboard.</p>
+            <p>Thank you for choosing our service.</p>
+            <p>Best regards,<br>The Vehicle Parking App Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ year }} Vehicle Parking App. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

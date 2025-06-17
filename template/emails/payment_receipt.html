@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .receipt {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Payment Receipt</h2>
+        </div>
+        <div class="content">
+            <p>Hello {{ name }},</p>
+            <p>Thank you for using our parking service. Here is your receipt:</p>
+            
+            <div class="receipt">
+                <h3>Receipt Details:</h3>
+                <p><strong>Location:</strong> {{ lot_name }}</p>
+                <p><strong>Spot Number:</strong> {{ spot_id }}</p>
+                <p><strong>Parking Time:</strong> {{ parking_time }}</p>
+                <p><strong>Leaving Time:</strong> {{ leaving_time }}</p>
+                <p><strong>Duration:</strong> {{ duration }} hours</p>
+                <p><strong>Rate:</strong> ₹{{ rate }}/hour</p>
+                
+                <p class="total">Total Amount: ₹{{ total_cost }}</p>
+            </div>
+            
+            <p>Thank you for your business. We hope to see you again soon!</p>
+            <p>Best regards,<br>The Vehicle Parking App Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ year }} Vehicle Parking App. All rights reserved.</p>
+            <p>Receipt #{{ receipt_id }}</p>
+        </div>
+    </div>
+</body>
+</html>
